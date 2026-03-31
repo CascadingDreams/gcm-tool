@@ -15,6 +15,3 @@ def get_staged_diff() -> str:
         print("Nothing staged. Run git add . first.")
         sys.exit(1)
     return result.stdout
-
-if __name__ == "__main__":
-    print(get_staged_diff())
