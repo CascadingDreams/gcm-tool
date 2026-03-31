@@ -1,6 +1,6 @@
 import subprocess
-from git import get_staged_diff
-from ai import generate_commit_message
+from gcm.git import get_staged_diff
+from gcm.ai import generate_commit_message
 import readline
 
 
