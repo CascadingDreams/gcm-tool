@@ -2,3 +2,5 @@
 .venv
 __pycache__
 gcm.egg-info/
+build/
+.pytest_cache/

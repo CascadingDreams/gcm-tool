@@ -9,6 +9,9 @@ dependencies = [
     "argcomplete",
 ]
 
+[project.optional-dependencies]
+dev = ["pytest"]
+
 [project.scripts]
 gcm = "gcm.main:main"
 
