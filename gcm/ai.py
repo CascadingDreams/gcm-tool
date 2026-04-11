@@ -1,16 +1,18 @@
+"""AI integration module for gcm using the Anthropic SDK."""
+
 import sys
 import os
 import anthropic
 from dotenv import load_dotenv
 
 MAX_DIFF_CHARS = 8000
+DEFAULT_MODEL = "claude-sonnet-4-6"
 
 
-def validate_api_key() -> str:
-    """Load and return the Anthropic API key from the environment.
+def get_client() -> anthropic.Anthropic:
+    """Load env and return an authenticated Anthropic client.
 
-    Reads from the ANTHROPIC_API_KEY env var (or a .env file via dotenv).
-    Prints a helpful setup message and exits with code 1 if the key is missing.
+    Exits with code 1 if ANTHROPIC_API_KEY is not set.
     """
     load_dotenv()
     api_key = os.getenv("ANTHROPIC_API_KEY")
@@ -19,7 +21,7 @@ def validate_api_key() -> str:
         print("  Add it to a .env file:  echo 'ANTHROPIC_API_KEY=sk-...' > .env")
         print("  Or export it:           export ANTHROPIC_API_KEY=sk-...")
         sys.exit(1)
-    return api_key
+    return anthropic.Anthropic(api_key=api_key)
 
 
 def generate_commit_message(
@@ -45,12 +47,11 @@ def generate_commit_message(
     Raises:
         SystemExit: On missing API key or unrecoverable API error.
     """
-    api_key = validate_api_key()
+    model = model or os.getenv("GCM_MODEL", DEFAULT_MODEL)
+    client = get_client()
 
     if len(diff) > MAX_DIFF_CHARS:
         diff = diff[:MAX_DIFF_CHARS] + "\n\n... [diff truncated to fit context window]"
-
-    model = model or os.getenv("GCM_MODEL", "claude-sonnet-4-6")
 
     type_rule = (
         f"You MUST use the type '{commit_type}'"
@@ -83,8 +84,6 @@ Rules:
 Git diff:
 {diff}"""
 
-    client = anthropic.Anthropic(api_key=api_key)
-
     try:
         response = client.messages.create(
             model=model,
@@ -92,6 +91,10 @@ Git diff:
             messages=[{"role": "user", "content": prompt}],
         )
         return response.content[0].text.strip()
+    except anthropic.AuthenticationError:
+        print("\033[31mAuthentication error:\033[0m Invalid or expired API key.")
+        print("Check your ANTHROPIC_API_KEY at https://console.anthropic.com/")
+        sys.exit(1)
     except anthropic.APIError as e:
         print(f"\033[33mAPI error:\033[0m {e}")
         retry = input("Retry? [y/n] ").strip().lower()

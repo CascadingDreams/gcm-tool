@@ -375,6 +375,9 @@ Or go to **System Properties → Environment Variables** and delete it from ther
 **`gcm` not found after install**
 → Make sure pipx's bin directory is on your PATH. Run `pipx ensurepath` and restart your terminal. On Windows, you may need to restart your session entirely.
 
+**Authentication error**
+→ Your key may be invalid or expired. Regenerate it at [console.anthropic.com](https://console.anthropic.com/).
+
 **Virtual environment not activating on Windows**
 → If `.venv\Scripts\activate` fails in PowerShell, you may need to allow local scripts to run. This only affects your user account, not the whole system:
 `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`
